@@ -1,28 +1,42 @@
 (ns spike-project-app.core
   (:require [clojure-csv.core :as csv])
+  (:use [clojure.java.io])
   (:gen-class))
 
-(defn parse-row [header row]
+(defn- parse-row [header row]
   (let [v (first (csv/parse-csv row))]
     (zipmap header v)
     )
   )
 
-(defn take-csv
-  "Takes file name and reads data."
+(defn- construct-line
+  [value]
+  (let [ordrTyp (format "%10s" (get value "OrdrTyp"))
+        fndPrvId (format "%10s" (get value "FndPrvId"))
+        ]
+    (str ordrTyp fndPrvId "\n")
+    )
+  )
+
+(defn- write-line [values]
+  (with-open [wrtr (writer "data-files/Order_ABA.dat")]
+    (doseq [item values] (.write wrtr (construct-line item)))
+    )
+  )
+
+(defn- take-csv
   [fname]
   (with-open [file (java.io.BufferedReader.
                  (java.io.FileReader. fname))]
     (let [header (first (csv/parse-csv (first (line-seq file))))]
-      (doall (map #(parse-row header %)  (line-seq file)))
+      (let [values (doall (map #(parse-row header %)  (line-seq file)))]
+        (write-line values)
+        )
       )
     ))
 
-
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
   ;; work around dangerous default behaviour in Clojure
   (alter-var-root #'*read-eval* (constantly false))
-  (println "Hello, World!")
   (take-csv "data-files/Order_Sample.csv"))
