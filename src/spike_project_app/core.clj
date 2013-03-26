@@ -11,8 +11,8 @@
 
 (defn- construct-line
   [value]
-  (let [ordrTyp (format "%10s" (get value "OrdrTyp"))
-        fndPrvId (format "%10s" (get value "FndPrvId"))
+  (let [ordrTyp (format "%10s" (get value "Name"))
+        fndPrvId (format "%10s" (get value "Email"))
         ]
     (str ordrTyp fndPrvId "\n")
     )
